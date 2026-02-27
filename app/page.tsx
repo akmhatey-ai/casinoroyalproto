@@ -10,8 +10,9 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   let prompts: { id: string; slug: string; title: string; description: string; isPremium: boolean; priceUsdCents: number | null; submitter: { name: string | null } }[] = [];
   let skills: { id: string; slug: string; name: string; description: string; isPremium: boolean; priceUsdCents: number | null; submitter: { name: string | null } }[] = [];
-  try {
-    [prompts, skills] = await Promise.all([
+  if (process.env.DATABASE_URL) {
+    try {
+      [prompts, skills] = await Promise.all([
       prisma.prompt.findMany({
         where: { status: "approved" },
         take: 6,
@@ -40,9 +41,10 @@ export default async function HomePage() {
           submitter: { select: { name: true } },
         },
       }),
-    ]);
-  } catch {
-    // DB not available
+      ]);
+    } catch {
+      // DB not available
+    }
   }
 
   return (
