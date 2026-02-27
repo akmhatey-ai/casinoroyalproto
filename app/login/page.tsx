@@ -7,6 +7,9 @@ export default async function LoginPage() {
   const session = await auth();
   if (session?.user) redirect("/dashboard");
 
+  const hasGoogle = !!(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim());
+  const hasGitHub = !!(process.env.GITHUB_ID?.trim() && process.env.GITHUB_SECRET?.trim());
+
   return (
     <AppShell>
       <div className="mx-auto flex max-w-md flex-col items-center justify-center gap-8">
@@ -18,22 +21,31 @@ export default async function LoginPage() {
             Sign in to submit prompts and skills, earn from tips, and manage your content.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <form action={async () => { "use server"; await signIn("google", { redirectTo: "/dashboard" }); }}>
-              <button
-                type="submit"
-                className="w-full rounded-full bg-[#FF9500] px-8 py-2.5 text-sm font-bold text-black transition-all hover:opacity-90 active:scale-95 sm:w-auto"
-              >
-                Sign in with Google
-              </button>
-            </form>
-            <form action={async () => { "use server"; await signIn("github", { redirectTo: "/dashboard" }); }}>
-              <button
-                type="submit"
-                className="w-full rounded-full border border-white/10 bg-white/5 px-8 py-2.5 text-sm font-medium text-[#A0A0A0] transition-colors hover:border-white/20 hover:text-white sm:w-auto"
-              >
-                Sign in with GitHub
-              </button>
-            </form>
+            {hasGoogle && (
+              <form action={async () => { "use server"; await signIn("google", { redirectTo: "/dashboard" }); }}>
+                <button
+                  type="submit"
+                  className="w-full rounded-full bg-[#FF9500] px-8 py-2.5 text-sm font-bold text-black transition-all hover:opacity-90 active:scale-95 sm:w-auto"
+                >
+                  Sign in with Google
+                </button>
+              </form>
+            )}
+            {hasGitHub && (
+              <form action={async () => { "use server"; await signIn("github", { redirectTo: "/dashboard" }); }}>
+                <button
+                  type="submit"
+                  className="w-full rounded-full border border-white/10 bg-white/5 px-8 py-2.5 text-sm font-medium text-[#A0A0A0] transition-colors hover:border-white/20 hover:text-white sm:w-auto"
+                >
+                  Sign in with GitHub
+                </button>
+              </form>
+            )}
+            {!hasGoogle && !hasGitHub && (
+              <p className="text-center text-sm text-[#A0A0A0]">
+                Add GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET or GITHUB_ID / GITHUB_SECRET to .env to enable sign-in.
+              </p>
+            )}
           </div>
           <p className="mt-6 text-center text-sm text-[#A0A0A0]">
             Connect a wallet later in Dashboard for payouts.

@@ -4,21 +4,24 @@ import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
 import { prisma } from "@/lib/prisma";
 
+const googleId = process.env.GOOGLE_CLIENT_ID?.trim();
+const googleSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
+const githubId = process.env.GITHUB_ID?.trim();
+const githubSecret = process.env.GITHUB_SECRET?.trim();
+
+const providers = [
+  ...(googleId && googleSecret
+    ? [Google({ clientId: googleId, clientSecret: googleSecret, allowDangerousEmailAccountLinking: true })]
+    : []),
+  ...(githubId && githubSecret
+    ? [GitHub({ clientId: githubId, clientSecret: githubSecret, allowDangerousEmailAccountLinking: true })]
+    : []),
+];
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? (process.env.NODE_ENV === "development" ? "dev-secret-change-in-production" : undefined),
   adapter: PrismaAdapter(prisma),
-  providers: [
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-      allowDangerousEmailAccountLinking: true,
-    }),
-    GitHub({
-      clientId: process.env.GITHUB_ID ?? "",
-      clientSecret: process.env.GITHUB_SECRET ?? "",
-      allowDangerousEmailAccountLinking: true,
-    }),
-  ],
+  providers,
   pages: {
     signIn: "/login",
     error: "/auth/error",
