@@ -4,6 +4,18 @@ import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
 import { prisma } from "@/lib/prisma";
 
+// Force canonical auth URL so OAuth redirect_uri matches GitHub/Google (critical on Vercel/serverless)
+const canonicalUrl =
+  process.env.AUTH_URL ??
+  process.env.NEXTAUTH_URL ??
+  process.env.NEXT_PUBLIC_APP_URL;
+if (canonicalUrl) {
+  const base = canonicalUrl.replace(/\/$/, "");
+  if (!process.env.AUTH_URL) {
+    process.env.AUTH_URL = base.startsWith("http") ? `${base}/api/auth` : `https://${base}/api/auth`;
+  }
+}
+
 const googleId = process.env.GOOGLE_CLIENT_ID?.trim();
 const googleSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
 const githubId = process.env.GITHUB_ID?.trim();
