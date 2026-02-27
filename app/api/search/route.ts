@@ -2,6 +2,12 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+  if (!process.env.DATABASE_URL) {
+    const format = req.nextUrl.searchParams.get("format");
+    const empty = format === "skills.md" ? { items: [] } : { items: [] };
+    return NextResponse.json(empty);
+  }
+
   const searchParams = req.nextUrl.searchParams;
   const q = searchParams.get("q")?.trim() ?? "";
   const type = searchParams.get("type"); // prompt | skill | all

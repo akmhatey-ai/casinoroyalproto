@@ -8,9 +8,16 @@ import { NextResponse } from "next/server";
  * Stub: total prompts, skills, downloads.
  */
 export async function GET() {
-  const session = await auth();
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json(
+      { prompts: 0, skills: 0, totalDownloads: 0 },
+      { status: 200 }
+    );
+  }
+  try {
+    const session = await auth();
 
-  const [promptCount, skillCount, totalPromptDownloads, totalSkillDownloads] = await Promise.all([
+    const [promptCount, skillCount, totalPromptDownloads, totalSkillDownloads] = await Promise.all([
     prisma.prompt.count({ where: { status: "approved" } }),
     prisma.skill.count({ where: { status: "approved" } }),
     prisma.prompt.aggregate({ where: { status: "approved" }, _sum: { downloads: true } }),
@@ -41,4 +48,10 @@ export async function GET() {
   }
 
   return NextResponse.json(stats);
+  } catch {
+    return NextResponse.json(
+      { error: "Service unavailable" },
+      { status: 503 }
+    );
+  }
 }
