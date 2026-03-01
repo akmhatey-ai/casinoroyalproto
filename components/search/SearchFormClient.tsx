@@ -40,7 +40,13 @@ export function SearchFormClient({ initialQ, initialType, initialPremium }: Prop
         placeholder="Search prompts, skills, and AI tools"
       />
       <div className="mt-6 flex flex-wrap items-center gap-4">
-        <FilterPills current={current} />
+        <FilterPills
+          current={current}
+          searchParams={{
+            q: initialQ ?? searchParams.get("q") ?? undefined,
+            premium: (initialPremium ?? searchParams.get("premium")) ?? undefined,
+          }}
+        />
         <button
           type="submit"
           disabled={isPending}

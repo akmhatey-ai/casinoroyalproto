@@ -25,6 +25,7 @@ model User {
   sessions     Session[]
   prompts      Prompt[]
   skills       Skill[]
+  items        Item[]
   transactions Transaction[]
   submissions  Submission[]
   votes        Vote[]
@@ -32,6 +33,49 @@ model User {
   @@index([walletSolana])
   @@index([walletEvm])
   @@map("users")
+}
+
+model Item {
+  id            String   @id @default(cuid())
+  type          String   // mcp | skill | prompt | tool
+  name          String
+  slug          String   @unique
+  description   String   @db.Text
+  content       String?  @db.Text
+  configJson    Json?    @map("config_json")
+  installUrl    String?  @map("install_url")
+  repoUrl       String?  @map("repo_url")
+  authorId      String?  @map("author_id")
+  walletSolana  String?  @map("wallet_solana")
+  walletEvm     String?  @map("wallet_evm")
+  priceUsdCents Int?     @map("price_usd_cents")
+  isFree        Boolean  @default(true) @map("is_free")
+  downloads     Int      @default(0)
+  tags          String[] @default([])
+  status        String   @default("pending") // draft | pending | approved | rejected
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  author User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([type, status])
+  @@index([slug])
+  @@index([authorId])
+  @@map("items")
+}
+
+model Tip {
+  id          String   @id @default(cuid())
+  fromWallet  String   @map("from_wallet")
+  toWallet    String   @map("to_wallet")
+  amountCents Int      @map("amount_cents")
+  chain       String   // solana | evm
+  txHash      String?  @map("tx_hash")
+  itemId      String?  @map("item_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([toWallet])
+  @@map("tips")
 }
 
 model Account {

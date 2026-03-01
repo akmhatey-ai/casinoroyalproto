@@ -9,6 +9,8 @@ export default async function LoginPage() {
 
   const hasGoogle = !!(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim());
   const hasGitHub = !!(process.env.GITHUB_ID?.trim() && process.env.GITHUB_SECRET?.trim());
+  const hasTwitter = !!(process.env.TWITTER_CLIENT_ID?.trim() && process.env.TWITTER_CLIENT_SECRET?.trim());
+  const hasAnyOAuth = hasGoogle || hasGitHub || hasTwitter;
 
   return (
     <AppShell>
@@ -41,9 +43,19 @@ export default async function LoginPage() {
                 </button>
               </form>
             )}
-            {!hasGoogle && !hasGitHub && (
+            {hasTwitter && (
+              <form action={async () => { "use server"; await signIn("twitter", { redirectTo: "/dashboard" }); }}>
+                <button
+                  type="submit"
+                  className="w-full rounded-full border border-white/10 bg-white/5 px-8 py-2.5 text-sm font-medium text-[#A0A0A0] transition-colors hover:border-white/20 hover:text-white sm:w-auto"
+                >
+                  Sign in with X
+                </button>
+              </form>
+            )}
+            {!hasAnyOAuth && (
               <p className="text-center text-sm text-[#A0A0A0]">
-                Add GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET or GITHUB_ID / GITHUB_SECRET to .env to enable sign-in.
+                Add GOOGLE_CLIENT_ID, GITHUB_ID, or TWITTER_CLIENT_ID (and secrets) to .env to enable sign-in.
               </p>
             )}
           </div>

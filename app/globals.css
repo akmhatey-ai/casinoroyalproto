@@ -4,6 +4,9 @@
 /* PromptHub Design System - Superdesign */
 :root {
   --bg-deep: #09090b;
+  --background: #09090b;
+  --foreground: #ffffff;
+  --muted-foreground: #a0a0a0;
   --orange: #ff9500;
   --orange-dark: #ff5e00;
   --orange-gradient: linear-gradient(to bottom, #ff9500, #ff5e00);
@@ -16,6 +19,10 @@
   --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
   --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
+
+.bg-background { background-color: var(--background); }
+.text-foreground { color: var(--foreground); }
+.text-muted-foreground { color: var(--muted-foreground); }
 
 body {
   background: var(--bg-deep);

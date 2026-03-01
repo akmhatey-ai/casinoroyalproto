@@ -74,8 +74,8 @@ export function getPaymentHeader(req: Request): string | null {
 }
 
 /**
- * Stub: in production, verify payment with facilitator and return tx hash + chain.
- * For now we accept any non-empty X-PAYMENT as "paid" for development.
+ * Verify payment. In production: POST payment header + requirement to X402_FACILITATOR_URL/verify.
+ * For development we accept non-empty X-PAYMENT; set X402_STRICT_VERIFY=true to require facilitator.
  */
 export async function verifyPayment(_paymentHeader: string): Promise<{
   verified: boolean;

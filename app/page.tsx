@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { SearchInput } from "@/components/ui/SearchInput";
@@ -50,10 +51,10 @@ export default async function HomePage() {
   return (
     <AppShell>
       <h1 className="font-display mb-4 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
-        Discover prompts & skills for AI agents
+        PromptHub — Marketplace for MCPs, Skills, Tools & Prompts
       </h1>
       <p className="mb-10 max-w-2xl text-lg text-[#A0A0A0]">
-        Search, browse, and one-click install. Free and premium content. Pay with x402.
+        One-click install to Claude, Cursor, OpenClaw. Free + premium paid via x402 on Solana/EVM.
       </p>
 
       <form action="/search" method="get" className="mb-10">
@@ -92,7 +93,7 @@ export default async function HomePage() {
         )}
       </section>
 
-      <section>
+      <section className="mb-16">
         <SectionHeader title="Popular Skills" viewAllHref="/search?type=skill" />
         {skills.length === 0 ? (
           <p className="text-sm text-[#A0A0A0]">No skills yet. Be the first to submit.</p>
@@ -113,6 +114,56 @@ export default async function HomePage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="mb-16 rounded-2xl border-2 border-[#FF9500]/40 bg-[#FF9500]/5 p-8">
+        <h2 className="font-display mb-2 text-2xl font-bold text-white">
+          For OpenClaw / autonomous agents
+        </h2>
+        <p className="mb-4 text-[#A0A0A0]">
+          Use the API without login. Copy this SKILL.md for full instructions and curl examples.
+        </p>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href="/for-agents"
+            className="rounded-full bg-[#FF9500] px-6 py-2.5 text-sm font-bold text-black transition-all hover:opacity-90"
+          >
+            Agent API & docs
+          </Link>
+          <a
+            href="/for-agents/skill.md"
+            className="rounded-full border border-white/20 bg-white/5 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/10"
+            download
+          >
+            Download SKILL.md
+          </a>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-white/10 bg-white/5 p-8">
+        <h2 className="font-display mb-2 text-2xl font-bold text-white">
+          Tip PromptHub
+        </h2>
+        <p className="mb-4 text-sm text-[#A0A0A0]">
+          Support the project via x402. Send USDC to:
+        </p>
+        <div className="mb-4 space-y-2 font-mono text-xs text-[#A0A0A0]">
+          {process.env.NEXT_PUBLIC_TIP_WALLET_SOL && (
+            <p>Solana: {process.env.NEXT_PUBLIC_TIP_WALLET_SOL}</p>
+          )}
+          {process.env.NEXT_PUBLIC_TIP_WALLET_EVM && (
+            <p>EVM (Base): {process.env.NEXT_PUBLIC_TIP_WALLET_EVM}</p>
+          )}
+          {!process.env.NEXT_PUBLIC_TIP_WALLET_SOL && !process.env.NEXT_PUBLIC_TIP_WALLET_EVM && (
+            <p>Set NEXT_PUBLIC_TIP_WALLET_SOL and NEXT_PUBLIC_TIP_WALLET_EVM in .env to show addresses.</p>
+          )}
+        </div>
+        <Link
+          href="/api/tip?amount=1"
+          className="inline-block rounded-full bg-[#FF9500] px-6 py-2.5 text-sm font-bold text-black hover:opacity-90"
+        >
+          Tip 0.01 USDC via x402
+        </Link>
       </section>
     </AppShell>
   );

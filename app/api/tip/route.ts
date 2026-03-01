@@ -4,6 +4,19 @@ import { buildPaymentRequired, getPaymentHeader, verifyPayment } from "@/lib/x40
 import { NextRequest, NextResponse } from "next/server";
 
 /**
+ * GET /api/tip?amount=1
+ * Platform tip: returns 402 with payment requirements (amount in cents, e.g. 1 = $0.01).
+ */
+export async function GET(req: NextRequest) {
+  const amountCents = Math.min(10000, Math.max(1, Number(req.nextUrl.searchParams.get("amount")) || 100));
+  const { status, body, headers } = buildPaymentRequired(
+    amountCents,
+    `Tip PromptHub (${(amountCents / 100).toFixed(2)} USDC)`
+  );
+  return new NextResponse(JSON.stringify(body), { status, headers: { ...headers } });
+}
+
+/**
  * POST /api/tip
  * Body: { userId: string, amountCents: number }
  * - If no X-PAYMENT: return 402 with payment requirements
