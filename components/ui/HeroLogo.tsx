@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-const LOGO = "/PromptHub_logo.png";
+const HEADLINE_IMAGE = "/headline.jpg";
 const FALLBACK = "/prompthub-wordmark.png";
 
 export function HeroLogo() {
-  const [src, setSrc] = useState(LOGO);
+  const [src, setSrc] = useState(HEADLINE_IMAGE);
   return (
     <img
       src={src}

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   },
   description: "Directory of MCP tools, prompts, and SKILL.md files. Search, submit, one-click install. Free and premium with x402 payments.",
   icons: {
-    icon: "/prompthub-icon.png",
+    icon: "/favicon.jpg",
   },
   openGraph: {
     title: "PromptHub — MCP Tools, Prompts & Skills for AI Agents",
