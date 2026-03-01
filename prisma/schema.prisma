@@ -14,6 +14,11 @@ model User {
   emailVerified DateTime? @map("email_verified")
   image         String?
   username      String?   @unique
+  bio           String?   @db.Text
+  website       String?
+  twitter       String?   @map("twitter")
+  github        String?   @map("github")
+  profilePublic Boolean   @default(true) @map("profile_public")
   walletSolana  String?   @map("wallet_solana")
   walletEvm     String?   @map("wallet_evm")
   earningsCents Int       @default(0) @map("earnings_cents")

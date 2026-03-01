@@ -23,8 +23,8 @@ export function buildPaymentRequired(
   options?: { payToEvm?: string; payToSolana?: string }
 ): { status: 402; body: PaymentRequirement; headers: Record<string, string> } {
   const price = `$${(amountCents / 100).toFixed(2)}`;
-  const payToEvm = options?.payToEvm ?? process.env.X402_PAY_TO_EVM ?? "";
-  const payToSolana = options?.payToSolana ?? process.env.X402_PAY_TO_SOLANA ?? "";
+  const payToEvm = options?.payToEvm ?? process.env.X402_PAY_TO_EVM ?? process.env.RECEIVER_WALLET_EVM ?? "";
+  const payToSolana = options?.payToSolana ?? process.env.X402_PAY_TO_SOLANA ?? process.env.RECEIVER_WALLET_SOL ?? "";
   const accepts: PaymentRequirement["accepts"] = [];
   if (payToEvm) {
     accepts.push({

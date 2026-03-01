@@ -4,12 +4,15 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Prompt Hub — MCP Tools, Prompts & Skills for AI Agents",
-    template: "%s | Prompt Hub",
+    default: "PromptHub — MCP Tools, Prompts & Skills for AI Agents",
+    template: "%s | PromptHub",
   },
   description: "Directory of MCP tools, prompts, and SKILL.md files. Search, submit, one-click install. Free and premium with x402 payments.",
+  icons: {
+    icon: "/prompthub-icon.png",
+  },
   openGraph: {
-    title: "Prompt Hub — MCP Tools, Prompts & Skills for AI Agents",
+    title: "PromptHub — MCP Tools, Prompts & Skills for AI Agents",
     description: "Directory of MCP tools, prompts, and SKILL.md files for AI agents.",
     type: "website",
   },

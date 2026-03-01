@@ -13,7 +13,7 @@ export default async function DashboardPage() {
   const [user, submissions, transactions] = await Promise.all([
     prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { earningsCents: true, walletSolana: true, walletEvm: true, email: true, name: true, image: true },
+      select: { earningsCents: true, walletSolana: true, walletEvm: true, email: true, name: true, image: true, username: true, profilePublic: true },
     }),
     prisma.submission.findMany({
       where: { userId: session.user.id },
@@ -56,6 +56,11 @@ export default async function DashboardPage() {
             Dashboard
           </h1>
           <p className="mt-1 text-[#A0A0A0]">{user?.name ?? user?.email ?? "User"}</p>
+          {user?.username && user?.profilePublic !== false && (
+            <Link href={`/profile/${user.username}`} className="mt-2 inline-block text-sm font-medium text-[#FF9500] hover:underline">
+              View public profile →
+            </Link>
+          )}
         </div>
       </div>
 

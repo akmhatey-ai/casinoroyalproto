@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { GlassCard } from "@/components/ui/GlassCard";
+import { HeroLogo } from "@/components/ui/HeroLogo";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { FilterPills } from "@/components/ui/FilterPills";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -48,14 +49,18 @@ export default async function HomePage() {
     }
   }
 
+  const tagline = "Marketplace for MCPs, Skills, Tools & Prompts. One-click install to Claude, Cursor, OpenClaw. Free + premium paid via x402 on Solana/EVM.";
+
   return (
     <AppShell>
-      <h1 className="font-display mb-4 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
-        PromptHub — Marketplace for MCPs, Skills, Tools & Prompts
-      </h1>
-      <p className="mb-10 max-w-2xl text-lg text-[#A0A0A0]">
-        One-click install to Claude, Cursor, OpenClaw. Free + premium paid via x402 on Solana/EVM.
-      </p>
+      <section className="mb-12 flex flex-col items-center text-center">
+        <div className="relative mb-4 flex justify-center">
+          <HeroLogo />
+        </div>
+        <p className="font-display max-w-2xl text-xl font-semibold tracking-tight text-white md:text-2xl">
+          {tagline}
+        </p>
+      </section>
 
       <form action="/search" method="get" className="mb-10">
         <SearchInput name="q" placeholder="Search prompts, skills, and AI tools" />
