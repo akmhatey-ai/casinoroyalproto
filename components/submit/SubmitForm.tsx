@@ -9,6 +9,90 @@ const labelClass = "mb-1 block text-sm font-medium text-[#A0A0A0]";
 
 type Tab = "prompt" | "skill" | "mcp" | "tool";
 
+function UnifiedSubmitForm({
+  tab,
+  submitUnified,
+  status,
+  setStatus,
+  labelClass,
+  inputClass,
+}: {
+  tab: "mcp" | "tool";
+  submitUnified: (e: React.FormEvent<HTMLFormElement>) => void;
+  status: string;
+  setStatus: (s: "idle" | "loading" | "success" | "error") => void;
+  labelClass: string;
+  inputClass: string;
+}) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [content, setContent] = useState("");
+  const [repoUrl, setRepoUrl] = useState("");
+  const [fetchStatus, setFetchStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+
+  async function fetchServerJson() {
+    const url = repoUrl.trim();
+    if (!url) return;
+    setFetchStatus("loading");
+    try {
+      const res = await fetch(`/api/fetch-server-json?repoUrl=${encodeURIComponent(url)}`);
+      if (!res.ok) {
+        const err = (await res.json()).error ?? "Not found";
+        throw new Error(err);
+      }
+      const data = (await res.json()) as { name?: string; description?: string; config?: Record<string, unknown> };
+      if (data.name) setName(data.name);
+      if (data.description) setDescription(data.description);
+      if (data.config) setContent(JSON.stringify(data.config, null, 2));
+      setFetchStatus("done");
+    } catch {
+      setFetchStatus("error");
+    }
+  }
+
+  return (
+    <form onSubmit={submitUnified} className="space-y-4">
+      <div>
+        <label className={labelClass}>Name *</label>
+        <input name="name" required value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder={tab === "mcp" ? "e.g. my-mcp-server" : "e.g. my-tool"} />
+      </div>
+      <div>
+        <label className={labelClass}>Description *</label>
+        <textarea name="description" required rows={2} value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} />
+      </div>
+      <div>
+        <label className={labelClass}>Content or config (optional)</label>
+        <textarea name="content" rows={6} value={content} onChange={(e) => setContent(e.target.value)} className={`${inputClass} font-mono`} placeholder="Markdown or JSON (e.g. server.json)" />
+      </div>
+      <div>
+        <label className={labelClass}>GitHub / repo URL (optional)</label>
+        <div className="flex gap-2">
+          <input name="repoUrl" type="url" value={repoUrl} onChange={(e) => setRepoUrl(e.target.value)} className={inputClass} placeholder="https://github.com/..." />
+          <button type="button" onClick={fetchServerJson} disabled={fetchStatus === "loading" || !repoUrl.trim()} className="shrink-0 rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 disabled:opacity-50">
+            {fetchStatus === "loading" ? "Fetching…" : "Fetch server.json"}
+          </button>
+        </div>
+        {fetchStatus === "done" && <p className="mt-1 text-xs text-emerald-400">Prefilled from repo.</p>}
+        {fetchStatus === "error" && <p className="mt-1 text-xs text-amber-400">Could not find server.json.</p>}
+      </div>
+      <div>
+        <label className={labelClass}>Wallet for payouts (Solana or EVM, recommended)</label>
+        <input name="walletSolana" className={inputClass} placeholder="Solana address" />
+        <input name="walletEvm" className={`mt-2 ${inputClass}`} placeholder="EVM address (0x...)" />
+      </div>
+      <div>
+        <label className={labelClass}>Tags (comma-separated)</label>
+        <input name="tags" className={inputClass} placeholder="mcp, api, tools" />
+      </div>
+      <div className="flex items-center gap-4">
+        <input type="number" name="priceUsdCents" step="0.01" min="0" placeholder="Price (USD, 0 = free)" className={`w-32 ${inputClass}`} />
+      </div>
+      <button type="submit" disabled={status === "loading"} className="rounded-full bg-[#FF9500] px-8 py-2.5 text-sm font-bold text-black hover:opacity-90 active:scale-95 disabled:opacity-50">{status === "loading" ? "Submitting..." : `Submit ${tab}`}</button>
+      {status === "error" && <p className="text-sm text-amber-400">Submission failed. Try again.</p>}
+    </form>
+  );
+}
+
 export function SubmitForm() {
   const [tab, setTab] = useState<Tab>("prompt");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -183,38 +267,7 @@ export function SubmitForm() {
       )}
 
       {(tab === "mcp" || tab === "tool") && (
-        <form onSubmit={submitUnified} className="space-y-4">
-          <div>
-            <label className={labelClass}>Name *</label>
-            <input name="name" required className={inputClass} placeholder={tab === "mcp" ? "e.g. my-mcp-server" : "e.g. my-tool"} />
-          </div>
-          <div>
-            <label className={labelClass}>Description *</label>
-            <textarea name="description" required rows={2} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Content or config (optional)</label>
-            <textarea name="content" rows={6} className={`${inputClass} font-mono`} placeholder="Markdown or JSON (e.g. server.json)" />
-          </div>
-          <div>
-            <label className={labelClass}>GitHub / repo URL (optional)</label>
-            <input name="repoUrl" type="url" className={inputClass} placeholder="https://github.com/..." />
-          </div>
-          <div>
-            <label className={labelClass}>Wallet for payouts (Solana or EVM, recommended)</label>
-            <input name="walletSolana" className={inputClass} placeholder="Solana address" />
-            <input name="walletEvm" className={`mt-2 ${inputClass}`} placeholder="EVM address (0x...)" />
-          </div>
-          <div>
-            <label className={labelClass}>Tags (comma-separated)</label>
-            <input name="tags" className={inputClass} placeholder="mcp, api, tools" />
-          </div>
-          <div className="flex items-center gap-4">
-            <input type="number" name="priceUsdCents" step="0.01" min="0" placeholder="Price (USD, 0 = free)" className={`w-32 ${inputClass}`} />
-          </div>
-          <button type="submit" disabled={status === "loading"} className="rounded-full bg-[#FF9500] px-8 py-2.5 text-sm font-bold text-black hover:opacity-90 active:scale-95 disabled:opacity-50">{status === "loading" ? "Submitting..." : `Submit ${tab}`}</button>
-          {status === "error" && <p className="text-sm text-amber-400">Submission failed. Try again.</p>}
-        </form>
+        <UnifiedSubmitForm tab={tab} submitUnified={submitUnified} status={status} setStatus={setStatus} labelClass={labelClass} inputClass={inputClass} />
       )}
     </div>
   );

@@ -2,6 +2,7 @@ import { auth, signIn } from "@/auth";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { GlassPanel } from "@/components/ui/GlassPanel";
+import { WalletConnectButton } from "@/components/auth/WalletConnectButton";
 
 export default async function LoginPage() {
   const session = await auth();
@@ -53,6 +54,7 @@ export default async function LoginPage() {
                 </button>
               </form>
             )}
+            <WalletConnectButton />
             {!hasAnyOAuth && (
               <p className="text-center text-sm text-[#A0A0A0]">
                 Add GOOGLE_CLIENT_ID, GITHUB_ID, or TWITTER_CLIENT_ID (and secrets) to .env to enable sign-in.
@@ -60,7 +62,7 @@ export default async function LoginPage() {
             )}
           </div>
           <p className="mt-6 text-center text-sm text-[#A0A0A0]">
-            Connect a wallet later in Dashboard for payouts.
+            Connect a wallet to sign in with EVM, or link one later in Dashboard for payouts.
           </p>
         </GlassPanel>
       </div>
