@@ -8,16 +8,6 @@ import { SiweMessage } from "siwe";
 import { prisma } from "@/lib/prisma";
 
 // Force canonical auth URL so OAuth redirect_uri matches GitHub/Google (critical on Vercel/serverless)
-const canonicalUrl =
-  process.env.AUTH_URL ??
-  process.env.NEXTAUTH_URL ??
-  process.env.NEXT_PUBLIC_APP_URL;
-if (canonicalUrl) {
-  const base = canonicalUrl.replace(/\/$/, "");
-  if (!process.env.AUTH_URL) {
-    process.env.AUTH_URL = base.startsWith("http") ? `${base}/api/auth` : `https://${base}/api/auth`;
-  }
-}
 
 const googleId = process.env.GOOGLE_CLIENT_ID?.trim();
 const googleSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
@@ -84,13 +74,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/auth/error",
   },
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
+    session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
       }
       return session;
     },
   },
-  session: { strategy: "database", maxAge: 30 * 24 * 60 * 60 },
+  session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
   trustHost: true,
 });
