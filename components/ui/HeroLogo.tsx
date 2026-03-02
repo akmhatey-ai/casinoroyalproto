@@ -1,18 +1,24 @@
 "use client";
 
-import { useState } from "react";
-
-const HEADLINE_IMAGE = "/headline.jpg";
-const FALLBACK = "/prompthub-wordmark.png";
-
+/**
+ * Hero wordmark: "Prompt" (white) + "hub" (white text in orange badge).
+ * Renders full "PromptHub" without relying on image assets.
+ */
 export function HeroLogo() {
-  const [src, setSrc] = useState(HEADLINE_IMAGE);
   return (
-    <img
-      src={src}
-      alt="PromptHub"
-      className="h-auto max-h-20 w-full max-w-md object-contain md:max-h-24"
-      onError={() => setSrc(FALLBACK)}
-    />
+    <div
+      className="flex items-center justify-center gap-0 font-display font-extrabold tracking-tight"
+      style={{ fontFamily: "var(--font-display)" }}
+    >
+      <span className="text-4xl text-[var(--color-text)] md:text-5xl lg:text-6xl">
+        Prompt
+      </span>
+      <span
+        className="ml-1 rounded-md px-2 py-0.5 text-4xl text-white md:ml-1.5 md:px-2.5 md:text-5xl lg:text-6xl"
+        style={{ backgroundColor: "var(--color-primary)" }}
+      >
+        hub
+      </span>
+    </div>
   );
 }
