@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-// Auth is enforced in server layouts (dashboard, submit) to keep Edge bundle under Vercel's 1 MB limit.
+// Empty matcher = middleware never runs; kept for compatibility.
+// Auth is enforced in server layouts to keep Edge bundle under Vercel's 1 MB limit.
 export function middleware() {
   return NextResponse.next();
 }
