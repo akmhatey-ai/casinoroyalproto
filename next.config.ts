@@ -1,10 +1,8 @@
-import path from "node:path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    root: path.resolve(process.cwd()),
-  },
+  // Keep Prisma out of serverless bundle (avoids size limits)
+  serverExternalPackages: ["@prisma/client"],
 };
 
 export default nextConfig;
