@@ -5,16 +5,19 @@ import { FilterPills } from "@/components/ui/FilterPills";
 import { prisma } from "@/lib/prisma";
 import { SearchFormClient } from "@/components/search/SearchFormClient";
 
-type SearchParams = { q?: string; type?: string; premium?: string };
+type SearchParams = { q?: string; type?: string; premium?: string; category?: string };
 
 export default async function SearchPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { q, type, premium } = await searchParams;
-  const baseWherePrompt = { status: "approved" as const, ...(premium === "free" && { isPremium: false }), ...(premium === "premium" && { isPremium: true }) };
-  const baseWhereSkill = { status: "approved" as const, ...(premium === "free" && { isPremium: false }), ...(premium === "premium" && { isPremium: true }) };
+  const { q, type, premium, category } = await searchParams;
+  const catFilter = category?.trim() && category !== "all"
+    ? { category: { equals: category, mode: "insensitive" as const } }
+    : {};
+  const baseWherePrompt = { status: "approved" as const, ...catFilter, ...(premium === "free" && { isPremium: false }), ...(premium === "premium" && { isPremium: true }) };
+  const baseWhereSkill = { status: "approved" as const, ...catFilter, ...(premium === "free" && { isPremium: false }), ...(premium === "premium" && { isPremium: true }) };
   const searchQ = q?.trim();
   const wherePrompt = searchQ
     ? { ...baseWherePrompt, OR: [{ title: { contains: searchQ, mode: "insensitive" as const } }, { description: { contains: searchQ, mode: "insensitive" as const } }] }
@@ -30,7 +33,7 @@ export default async function SearchPage({
 
   return (
     <AppShell>
-      <h1 className="font-display mb-4 text-4xl font-extrabold tracking-tight text-white md:text-5xl">
+      <h1 className="font-display mb-4 text-4xl font-extrabold tracking-tight text-[var(--color-text)] md:text-5xl">
         Search
       </h1>
       <SearchFormClient initialQ={q} initialType={type} initialPremium={premium} />
@@ -63,7 +66,7 @@ export default async function SearchPage({
           ))}
       </div>
       {prompts.length === 0 && skills.length === 0 && (
-        <p className="mt-8 text-[#A0A0A0]">No results. Try different filters or search terms.</p>
+        <p className="mt-8 text-[var(--color-text-muted)]">No results. Try different filters or search terms.</p>
       )}
     </AppShell>
   );

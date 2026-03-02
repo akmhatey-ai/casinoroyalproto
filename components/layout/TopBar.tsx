@@ -1,21 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Icon } from "@iconify/react";
 import { useRef, useEffect, useState } from "react";
 
 const navItems = [
   { href: "/", label: "Home" },
-  { href: "/search", label: "Search" },
+  { href: "/search", label: "Browse" },
+  { href: "/categories", label: "Categories" },
   { href: "/submit", label: "Submit" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export function TopBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [navbarSearch, setNavbarSearch] = useState("");
+  const [aiSearch, setAiSearch] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,23 +34,45 @@ export function TopBar() {
     }
   }, [open]);
 
+  function handleNavbarSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = navbarSearch.trim();
+    if (q) router.push(`/search?q=${encodeURIComponent(q)}${aiSearch ? "&ai=1" : ""}`);
+    setMobileMenuOpen(false);
+  }
+
   return (
-    <header className="sticky top-0 z-40 border-b border-white/5 bg-[#09090B]/95 backdrop-blur supports-[backdrop-filter]:bg-[#09090B]/80">
-      <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-6 px-4 md:px-6 lg:px-8">
-        <Link href="/" className="font-display flex items-center gap-2 text-lg font-extrabold tracking-tight text-white">
-          <img src="/prompthub-icon.png" alt="" className="h-7 w-7 rounded" />
-          <span>PromptHub</span>
+    <header
+      className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-bg)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--color-bg)]/90"
+      style={{ borderColor: "var(--color-border)" }}
+    >
+      <div className="mx-auto flex h-14 max-w-[1440px] items-center justify-between gap-4 px-4 md:px-6 lg:px-8">
+        {/* Logo: PH badge + wordmark */}
+        <Link
+          href="/"
+          className="font-display flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight text-[var(--color-text)]"
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded bg-[var(--color-primary)] text-sm font-black text-black">
+            PH
+          </span>
+          <span className="hidden sm:inline">PromptHub</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 sm:flex">
+        {/* Nav links (desktop) */}
+        <nav className="hidden items-center gap-0.5 md:flex">
           {navItems.map(({ href, label }) => {
-            const isActive = href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
+            const isActive =
+              href === "/"
+                ? pathname === "/"
+                : pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
                 key={href}
                 href={href}
                 className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive ? "bg-white/10 text-[#FF9500]" : "text-[#A0A0A0] hover:bg-white/5 hover:text-white"
+                  isActive
+                    ? "bg-[var(--color-surface)] text-[var(--color-primary)]"
+                    : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]"
                 }`}
               >
                 {label}
@@ -55,7 +83,9 @@ export function TopBar() {
             <Link
               href="/dashboard"
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                pathname.startsWith("/dashboard") ? "bg-white/10 text-[#FF9500]" : "text-[#A0A0A0] hover:bg-white/5 hover:text-white"
+                pathname.startsWith("/dashboard")
+                  ? "bg-[var(--color-surface)] text-[var(--color-primary)]"
+                  : "text-[var(--color-text-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text)]"
               }`}
             >
               Dashboard
@@ -63,47 +93,96 @@ export function TopBar() {
           )}
         </nav>
 
-        <div className="flex items-center gap-2" ref={ref}>
+        {/* Navbar search (desktop) — keyword + AI toggle */}
+        <form
+          onSubmit={handleNavbarSearch}
+          className="hidden flex-1 max-w-xs lg:flex lg:max-w-sm items-center gap-2"
+        >
+          <div className="relative flex-1">
+            <Icon
+              icon="lucide:search"
+              className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]"
+            />
+            <input
+              type="search"
+              value={navbarSearch}
+              onChange={(e) => setNavbarSearch(e.target.value)}
+              placeholder="Search..."
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 pl-9 pr-3 text-sm text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:outline-none"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setAiSearch((x) => !x)}
+            className={`shrink-0 rounded-lg border px-2 py-2 text-xs font-medium transition-colors ${
+              aiSearch
+                ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+                : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-text-muted)]"
+            }`}
+            title="Toggle AI semantic search"
+          >
+            AI
+          </button>
+        </form>
+
+        {/* CTAs: Submit Prompt (orange) + Sign In (ghost) */}
+        <div className="flex shrink-0 items-center gap-2" ref={ref}>
+          <Link
+            href="/submit"
+            className="hidden rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-black transition-colors hover:bg-[var(--color-primary-dark)] sm:inline-block"
+          >
+            Submit Prompt
+          </Link>
           {status === "loading" ? (
-            <div className="h-9 w-20 animate-pulse rounded-full bg-white/10" />
+            <div className="h-9 w-24 animate-pulse rounded-lg bg-[var(--color-surface)]" />
           ) : session?.user ? (
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setOpen((o) => !o)}
-                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1.5 pl-1.5 pr-3 text-sm font-medium text-white transition-colors hover:bg-white/10"
+                className="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-1.5 pl-1.5 pr-3 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--color-surface-hover)]"
                 aria-expanded={open}
               >
                 {session.user.image ? (
-                  <img src={session.user.image} alt="" className="h-6 w-6 rounded-full" />
+                  <img
+                    src={session.user.image}
+                    alt=""
+                    className="h-6 w-6 rounded-full"
+                  />
                 ) : (
-                  <Icon icon="lucide:user" className="text-lg text-[#A0A0A0]" />
+                  <Icon
+                    icon="lucide:user"
+                    className="h-5 w-5 text-[var(--color-text-muted)]"
+                  />
                 )}
-                <span className="max-w-[120px] truncate text-[#D4D4D8]">
+                <span className="max-w-[100px] truncate hidden xs:inline">
                   {session.user.name ?? session.user.email ?? "Account"}
                 </span>
-                <Icon icon="lucide:chevron-down" className="text-[#A0A0A0]" />
+                <Icon icon="lucide:chevron-down" className="h-4 w-4 text-[var(--color-text-muted)]" />
               </button>
               {open && (
-                <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-white/10 bg-[#0a0a0a] py-1 shadow-xl">
+                <div className="absolute right-0 top-full mt-1 w-48 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-1 shadow-xl">
                   <Link
                     href="/dashboard"
-                    className="block px-4 py-2 text-sm text-[#A0A0A0] hover:bg-white/5 hover:text-white"
+                    className="block px-4 py-2 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
                     onClick={() => setOpen(false)}
                   >
                     Dashboard
                   </Link>
                   <Link
                     href="/dashboard/settings"
-                    className="block px-4 py-2 text-sm text-[#A0A0A0] hover:bg-white/5 hover:text-white"
+                    className="block px-4 py-2 text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
                     onClick={() => setOpen(false)}
                   >
                     Settings
                   </Link>
                   <button
                     type="button"
-                    className="block w-full px-4 py-2 text-left text-sm text-[#A0A0A0] hover:bg-white/5 hover:text-white"
-                    onClick={() => { setOpen(false); signOut({ callbackUrl: "/" }); }}
+                    className="block w-full px-4 py-2 text-left text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
+                    onClick={() => {
+                      setOpen(false);
+                      signOut({ callbackUrl: "/" });
+                    }}
                   >
                     Sign out
                   </button>
@@ -113,13 +192,92 @@ export function TopBar() {
           ) : (
             <Link
               href="/login"
-              className="rounded-full bg-[#FF9500] px-6 py-2.5 text-sm font-bold text-black transition-all hover:opacity-90 active:scale-95"
+              className="rounded-lg border border-[var(--color-primary)] px-4 py-2 text-sm font-medium text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary)]/10"
             >
-              Login / Sign in
+              Sign In
             </Link>
           )}
+
+          {/* Mobile hamburger */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((x) => !x)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] md:hidden"
+            aria-label="Open menu"
+          >
+            <Icon icon={mobileMenuOpen ? "lucide:x" : "lucide:menu"} className="h-5 w-5" />
+          </button>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="border-t border-[var(--color-border)] bg-[var(--color-bg)] p-4 md:hidden">
+          <nav className="flex flex-col gap-1">
+            {navItems.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-surface)]"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {label}
+              </Link>
+            ))}
+            {session && (
+              <Link
+                href="/dashboard"
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-[var(--color-text)] hover:bg-[var(--color-surface)]"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+            )}
+          </nav>
+          <form onSubmit={handleNavbarSearch} className="mt-3 flex gap-2">
+            <input
+              type="search"
+              value={navbarSearch}
+              onChange={(e) => setNavbarSearch(e.target.value)}
+              placeholder="Search..."
+              className="flex-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text)]"
+            />
+            <button
+              type="button"
+              onClick={() => setAiSearch((x) => !x)}
+              className={`rounded-lg border px-3 py-2 text-xs font-medium ${
+                aiSearch ? "border-[var(--color-primary)] text-[var(--color-primary)]" : "border-[var(--color-border)] text-[var(--color-text-muted)]"
+              }`}
+            >
+              AI
+            </button>
+            <button
+              type="submit"
+              className="rounded-lg bg-[var(--color-primary)] px-4 py-2 text-sm font-bold text-black"
+            >
+              Search
+            </button>
+          </form>
+          <div className="mt-3 flex gap-2">
+            <Link
+              href="/submit"
+              className="flex-1 rounded-lg bg-[var(--color-primary)] py-2.5 text-center text-sm font-bold text-black"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Submit Prompt
+            </Link>
+            {!session && (
+              <Link
+                href="/login"
+                className="flex-1 rounded-lg border border-[var(--color-primary)] py-2.5 text-center text-sm font-medium text-[var(--color-primary)]"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

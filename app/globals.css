@@ -1,23 +1,33 @@
 @import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap");
 @import "tailwindcss";
 
-/* PromptHub Design System - Superdesign */
+/* PromptHub Design System — Orange + Black (SkillsMP-style upgrade) */
 :root {
-  --bg-deep: #09090b;
-  --background: #09090b;
-  --foreground: #ffffff;
-  --muted-foreground: #a0a0a0;
-  --orange: #ff9500;
-  --orange-dark: #ff5e00;
-  --orange-gradient: linear-gradient(to bottom, #ff9500, #ff5e00);
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
+  /* Brand (prompt spec) */
+  --color-primary: #FF9000;
+  --color-primary-dark: #CC7300;
+  --color-bg: #1B1B1B;
+  --color-surface: #2B2B2B;
+  --color-surface-hover: #333333;
+  --color-border: #3A3A3A;
+  --color-text: #F5F5F5;
+  --color-text-muted: #999999;
+  /* Legacy / aliases */
+  --bg-deep: var(--color-bg);
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --muted-foreground: var(--color-text-muted);
+  --orange: var(--color-primary);
+  --orange-dark: var(--color-primary-dark);
+  --orange-gradient: linear-gradient(to bottom, var(--color-primary), var(--color-primary-dark));
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-text-muted);
   --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-border-hover: rgba(255, 149, 0, 0.3);
+  --glass-border: var(--color-border);
+  --glass-border-hover: rgba(255, 144, 0, 0.35);
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
-  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "DM Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
 .bg-background { background-color: var(--background); }
@@ -45,14 +55,19 @@ body {
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 149, 0, 0.3);
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px -20px rgba(255, 149, 0, 0.2);
+  background: var(--color-surface-hover);
+  border-color: var(--glass-border-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(255, 144, 0, 0.2);
 }
 
 /* Search input focus */
 .search-input:focus {
-  border-color: rgba(255, 149, 0, 0.5);
-  box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(255, 144, 0, 0.15);
+}
+
+/* Card border radius per spec */
+.glass-card {
+  border-radius: 8px;
 }
