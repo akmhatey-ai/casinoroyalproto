@@ -71,9 +71,14 @@ export async function POST(req: Request) {
     }
 
     const session = await auth();
-    const fromWallet = (session?.user as { id?: string })?.id
-      ? (await prisma.user.findUnique({ where: { id: (session.user as { id: string }).id } }))?.walletEvm ?? "unknown"
-      : "anonymous";
+    const userId = (session?.user as { id?: string })?.id;
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const fromWallet =
+      (await prisma.user.findUnique({ where: { id: userId } }))?.walletEvm ?? "unknown";
 
     await prisma.tip.create({
       data: {
@@ -85,7 +90,7 @@ export async function POST(req: Request) {
       },
     });
 
-    const txUserId = toUserIdRecord ?? (session?.user as { id?: string })?.id;
+    const txUserId = toUserIdRecord ?? userId;
     if (txUserId) {
       await prisma.transaction.create({
         data: {
