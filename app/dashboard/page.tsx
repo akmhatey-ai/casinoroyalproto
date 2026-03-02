@@ -78,6 +78,24 @@ export default async function DashboardPage() {
 
         <GlassPanel>
           <h2 className="font-display text-sm font-bold uppercase tracking-widest text-[#A0A0A0]">
+            Quick links
+          </h2>
+          <ul className="mt-2 space-y-2 text-sm">
+            <li>
+              <Link href="/dashboard/services" className="font-medium text-[#FF9500] hover:underline">
+                My services (vendor)
+              </Link>
+            </li>
+            <li>
+              <Link href="/dashboard/tickets" className="font-medium text-[#FF9500] hover:underline">
+                Support tickets
+              </Link>
+            </li>
+          </ul>
+        </GlassPanel>
+
+        <GlassPanel>
+          <h2 className="font-display text-sm font-bold uppercase tracking-widest text-[#A0A0A0]">
             Wallets
           </h2>
           <ul className="mt-2 space-y-1 text-sm text-[#A0A0A0]">
@@ -134,7 +152,9 @@ export default async function DashboardPage() {
           <ul className="space-y-2">
             {transactions.map((t) => (
               <li key={t.id} className="text-sm text-[#A0A0A0]">
-                {t.itemType} — ${(t.amountCents / 100).toFixed(2)} — {t.status}
+                {t.itemType} — ${(t.amountCents / 100).toFixed(2)}
+                {t.platformCents != null && t.vendorCents != null && ` (you: $${(t.vendorCents / 100).toFixed(2)})`}
+                — {t.status}
               </li>
             ))}
           </ul>

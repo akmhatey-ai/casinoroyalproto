@@ -1,10 +1,13 @@
 /**
  * x402 payment helpers for premium content.
- * Return 402 with payment requirements; verify X-PAYMENT header and settle.
- * For production, wire to @x402/core facilitator and @x402/evm, @x402/svm.
+ * Return 402 with payment requirements; verify PAYMENT-SIGNATURE / X-PAYMENT and settle.
+ * USDC on Solana + EVM (Base default). Production: wire to facilitator.
  */
 
-const FACILITATOR_URL = process.env.X402_FACILITATOR_URL ?? "https://x402.org/facilitator";
+import { getOwnerWallets } from "./payment-config";
+import { EVM_NETWORKS, SOLANA_NETWORKS } from "./payment-config";
+
+const FACILITATOR_URL = process.env.X402_FACILITATOR_URL ?? process.env.NEXT_PUBLIC_X402_FACILITATOR_URL ?? "https://x402.org/facilitator";
 
 export interface PaymentRequirement {
   amountCents: number;
@@ -17,36 +20,69 @@ export interface PaymentRequirement {
   }>;
 }
 
+export type PaymentOptions = {
+  payToEvm?: string;
+  payToSolana?: string;
+  /** Preferred chain for ordering: evm (Base first) or solana */
+  preferredChain?: "evm" | "solana";
+  /** Include Base Sepolia / Solana Devnet for testnets */
+  testnet?: boolean;
+};
+
 export function buildPaymentRequired(
   amountCents: number,
   description: string,
-  options?: { payToEvm?: string; payToSolana?: string }
+  options?: PaymentOptions
 ): { status: 402; body: PaymentRequirement; headers: Record<string, string> } {
   const price = `$${(amountCents / 100).toFixed(2)}`;
-  const payToEvm = options?.payToEvm ?? process.env.X402_PAY_TO_EVM ?? process.env.RECEIVER_WALLET_EVM ?? "";
-  const payToSolana = options?.payToSolana ?? process.env.X402_PAY_TO_SOLANA ?? process.env.RECEIVER_WALLET_SOL ?? "";
+  const owner = getOwnerWallets();
+  const payToEvm = options?.payToEvm ?? owner.evm;
+  const payToSolana = options?.payToSolana ?? owner.solana;
   const accepts: PaymentRequirement["accepts"] = [];
+  const preferEvm = options?.preferredChain !== "solana";
+
   if (payToEvm) {
     accepts.push({
       scheme: "exact",
       price,
-      network: "eip155:8453", // Base mainnet; use eip155:84532 for Base Sepolia
+      network: EVM_NETWORKS.base.caip2,
       payTo: payToEvm,
     });
+    if (options?.testnet) {
+      accepts.push({
+        scheme: "exact",
+        price,
+        network: EVM_NETWORKS.baseSepolia.caip2,
+        payTo: payToEvm,
+      });
+    }
   }
   if (payToSolana) {
     accepts.push({
       scheme: "exact",
       price,
-      network: "solana:5eykt4SsFv8VHZbfC", // Solana mainnet
+      network: SOLANA_NETWORKS.mainnet.caip2,
       payTo: payToSolana,
     });
+    if (options?.testnet) {
+      accepts.push({
+        scheme: "exact",
+        price,
+        network: SOLANA_NETWORKS.devnet.caip2,
+        payTo: payToSolana,
+      });
+    }
+  }
+  if (preferEvm && accepts.length > 1) {
+    accepts.sort((a, b) => (a.network.startsWith("eip155") ? -1 : 1) - (b.network.startsWith("eip155") ? -1 : 1));
+  } else if (!preferEvm && accepts.length > 1) {
+    accepts.sort((a, b) => (a.network.startsWith("solana") ? -1 : 1) - (b.network.startsWith("solana") ? -1 : 1));
   }
   if (accepts.length === 0) {
     accepts.push({
       scheme: "exact",
       price,
-      network: "eip155:84532",
+      network: EVM_NETWORKS.baseSepolia.caip2,
       payTo: "0x0000000000000000000000000000000000000000",
     });
   }
@@ -65,12 +101,9 @@ export function buildPaymentRequired(
   };
 }
 
-/**
- * Verify X-PAYMENT header. In production, use facilitator client to verify.
- * For development, optional bypass if X-PAYMENT is a known dev token.
- */
+/** Get payment proof from request (PAYMENT-SIGNATURE or X-PAYMENT per x402). */
 export function getPaymentHeader(req: Request): string | null {
-  return req.headers.get("X-PAYMENT") ?? null;
+  return req.headers.get("PAYMENT-SIGNATURE") ?? req.headers.get("X-PAYMENT") ?? null;
 }
 
 /**

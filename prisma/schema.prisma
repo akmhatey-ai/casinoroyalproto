@@ -31,9 +31,12 @@ model User {
   prompts      Prompt[]
   skills       Skill[]
   items        Item[]
-  transactions Transaction[]
-  submissions  Submission[]
-  votes        Vote[]
+  transactions   Transaction[]
+  submissions    Submission[]
+  votes          Vote[]
+  services       Service[]
+  supportTickets SupportTicket[]
+  ticketComments TicketComment[]
 
   @@index([walletSolana])
   @@index([walletEvm])
@@ -171,21 +174,79 @@ model Skill {
 }
 
 model Transaction {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  itemType  String   @map("item_type") // prompt | skill | tip
-  itemId    String   @map("item_id")
-  amountCents Int    @map("amount_cents")
-  chain     String   // solana | evm
-  txHash    String?  @map("tx_hash")
-  status    String   @default("pending") // pending | completed | failed
-  createdAt DateTime @default(now()) @map("created_at")
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  itemType      String   @map("item_type") // prompt | skill | tip | service
+  itemId        String   @map("item_id")
+  amountCents   Int      @map("amount_cents")
+  platformCents Int?     @map("platform_cents") // 25% when vendor service
+  vendorCents   Int?     @map("vendor_cents")  // 75% when vendor service
+  vendorId      String?  @map("vendor_id")
+  serviceId     String?  @map("service_id")
+  chain         String   // solana | evm
+  txHash        String?  @map("tx_hash")
+  status        String   @default("pending") // pending | completed | failed
+  createdAt     DateTime @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([vendorId])
   @@index([status])
   @@map("transactions")
+}
+
+model Service {
+  id                 String   @id @default(cuid())
+  vendorId           String   @map("vendor_id")
+  name               String
+  slug               String   @unique
+  description        String   @db.Text
+  priceUsdCents      Int      @map("price_usd_cents")
+  payoutWalletEvm    String?  @map("payout_wallet_evm")
+  payoutWalletSolana String? @map("payout_wallet_solana")
+  preferredChain     String   @default("evm") @map("preferred_chain") // evm | solana; EVM defaults to Base
+  status             String   @default("draft") // draft | active | archived
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  vendor User @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+  @@index([status])
+  @@map("services")
+}
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  title       String
+  description String   @db.Text
+  status      String   @default("open") // open | pending | closed
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments TicketComment[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("support_tickets")
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  ticketId  String   @map("ticket_id")
+  userId    String   @map("user_id")
+  body      String   @db.Text
+  isStaff   Boolean  @default(false) @map("is_staff")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@map("ticket_comments")
 }
 
 model Submission {

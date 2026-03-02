@@ -92,13 +92,18 @@ export function SidebarRail() {
               )}
             </button>
             {open && (
-              <div className="absolute bottom-full left-1/2 mb-2 w-40 -translate-x-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] py-1 shadow-xl">
-                <Link
-                  href="/dashboard"
-                  className="block px-4 py-2 text-left text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
-                  onClick={() => setOpen(false)}
-                >
+              <div className="absolute bottom-full left-1/2 mb-2 w-48 -translate-x-1/2 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] py-1 shadow-xl">
+                <Link href="/dashboard" className="block px-4 py-2 text-left text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]" onClick={() => setOpen(false)}>
                   Dashboard
+                </Link>
+                <Link href="/dashboard/services" className="block px-4 py-2 text-left text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]" onClick={() => setOpen(false)}>
+                  My services
+                </Link>
+                <Link href="/dashboard/tickets" className="block px-4 py-2 text-left text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]" onClick={() => setOpen(false)}>
+                  Support tickets
+                </Link>
+                <Link href="/dashboard/settings" className="block px-4 py-2 text-left text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]" onClick={() => setOpen(false)}>
+                  Settings
                 </Link>
                 <button
                   type="button"

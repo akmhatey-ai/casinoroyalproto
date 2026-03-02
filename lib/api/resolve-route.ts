@@ -15,7 +15,11 @@ export function resolveRoute(
     diagnostic: "diagnostic",
     submit: "submit",
     tip: "tip",
+    payments: "payments",
+    services: "services",
     vote: "vote",
+    tickets: "tickets",
+    "tickets/create": "tickets-create",
     search: "search",
     analytics: "analytics",
     "fetch-server-json": "fetch-server-json",
@@ -64,6 +68,28 @@ export function resolveRoute(
   if (p.length === 2 && p[0] === "install") {
     params.id = p[1];
     return { moduleKey: "install-id", params };
+  }
+
+  // services/[id], services/[id]/access
+  if (p.length === 2 && p[0] === "services") {
+    params.id = p[1];
+    return { moduleKey: "services-id", params };
+  }
+  if (p.length === 3 && p[0] === "services" && p[2] === "access") {
+    params.id = p[1];
+    return { moduleKey: "services-id-access", params };
+  }
+
+  // tickets, tickets/create, tickets/[id], tickets/[id]/comments
+  if (p.length === 1 && p[0] === "tickets") return { moduleKey: "tickets", params };
+  if (p.length === 2 && p[0] === "tickets" && p[1] === "create") return { moduleKey: "tickets-create", params };
+  if (p.length === 2 && p[0] === "tickets") {
+    params.id = p[1];
+    return { moduleKey: "tickets-id", params };
+  }
+  if (p.length === 3 && p[0] === "tickets" && p[2] === "comments") {
+    params.id = p[1];
+    return { moduleKey: "tickets-id-comments", params };
   }
 
   // for-agents/skill.md
